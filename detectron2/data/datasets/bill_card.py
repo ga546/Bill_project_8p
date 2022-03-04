@@ -14,7 +14,7 @@ __all__ = ["load_bill_card_instances", "register_bill_card"]
 
 # fmt: off
 CLASS_NAMES = (
-    "train_ticket", "bank_card"
+    "train_ticket", "bank_card", "bill_card"
 )
 # fmt: on
 
@@ -50,8 +50,10 @@ def load_bill_card_instances(dirname: str, split: str, class_names: Union[List[s
         for obj in item["annotations"]:
             keypoint = obj["keypoint"]
             angle = obj["angle"]
+            #增加类别:
+            cls = obj["category"]
             instances.append(
-                {"category_id": 0, "bbox": None, "poly": keypoint, "bbox_mode": BoxMode.XYXY_ABS, "angle": angle}
+                {"category_id": class_names.index(cls), "bbox": None, "poly": keypoint, "bbox_mode": BoxMode.XYXY_ABS, "angle": angle}
             )
         r["annotations"] = instances
         dicts.append(r)

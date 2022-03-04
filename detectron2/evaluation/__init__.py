@@ -6,6 +6,7 @@ from .evaluator import DatasetEvaluator, DatasetEvaluators, inference_context, i
 from .lvis_evaluation import LVISEvaluator
 from .panoptic_evaluation import COCOPanopticEvaluator
 from .pascal_voc_evaluation import PascalVOCDetectionEvaluator
+from .bill_card_evaluation import BillCardDetectionEvaluator
 from .sem_seg_evaluation import SemSegEvaluator
 from .testing import print_csv_format, verify_results
 

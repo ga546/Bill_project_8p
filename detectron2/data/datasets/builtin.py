@@ -240,7 +240,7 @@ def register_all_bill_card(root):
     ]
     for name, dirname, split in SPLITS:
         register_bill_card(name, os.path.join(root, dirname), split)
-        MetadataCatalog.get(name).evaluator_type = "None" ## ToDo
+        MetadataCatalog.get(name).evaluator_type = "bill_card" ## ToDo
 
 def register_all_ade20k(root):
     root = os.path.join(root, "ADEChallengeData2016")

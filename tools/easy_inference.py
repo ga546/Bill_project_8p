@@ -18,6 +18,7 @@ from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.modeling import build_model
 import detectron2.data.transforms as T
 from rectify_roi import *
+
 # constants
 WINDOW_NAME = "COCO detections"
 
@@ -53,12 +54,12 @@ def get_parser():
         "--input",
         nargs="+",
         help="A list of space separated input images; "
-        "or a single glob pattern such as 'directory/*.jpg'",
+             "or a single glob pattern such as 'directory/*.jpg'",
     )
     parser.add_argument(
         "--output",
         help="A file or directory to save output visualizations. "
-        "If not given, will show output in an OpenCV window.",
+             "If not given, will show output in an OpenCV window.",
     )
 
     parser.add_argument(
@@ -74,7 +75,6 @@ def get_parser():
         nargs=argparse.REMAINDER,
     )
     return parser
-
 
 
 if __name__ == "__main__":
@@ -93,8 +93,9 @@ if __name__ == "__main__":
     checkpointer = DetectionCheckpointer(model)
     checkpointer.load(cfg.MODEL.WEIGHTS)
     aug = T.ResizeShortestEdge(
-            [cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST
-        )
+        [cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST
+    )
+    class_name = ["train_ticker", "bank_card", "bill_card"]
     for path in tqdm.tqdm(args.input):
         ori_img = read_image(os.path.join(root, path), format="BGR")
         start_time = time.time()
@@ -103,18 +104,30 @@ if __name__ == "__main__":
         img = torch.as_tensor(img.astype("float32").transpose(2, 0, 1))
         inputs = {"image": img, "height": height, "width": width}
         predictions = model([inputs])[0]["instances"]
+        # print(model([inputs]))
         points = predictions.pred_points.cpu().detach().numpy()
-        points = points.reshape(-1, 4, 2).astype( np.int32 )
+        points = points.reshape(-1, 4, 2).astype(np.int32)
         print(path, points)
+
+        # 目标的类别
+        class_idx = predictions.pred_classes.cpu().detach().numpy().tolist()
+        print(class_idx)
+
         ori_img = ori_img.astype(np.uint8)
-        filename = path.split( "/" )[-1]
+        filename = path.split("/")[-1]
         if rectify:
             rois_ = [project_rectify(ori_img, point) for point in points]
-        cv2.polylines(ori_img, points, True, (0, 255, 255), thickness=2, lineType=cv2.LINE_AA )
-        [cv2.putText(ori_img, "score: "+str(score), tuple(points[i][0].tolist()), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2) for i, score in enumerate(predictions.scores.cpu().detach().numpy().tolist())]
-        cv2.imwrite( "{}/{}".format( res_dir, filename ), ori_img )
+        cv2.polylines(ori_img, points, True, (0, 255, 255), thickness=2, lineType=cv2.LINE_AA)
+        [cv2.putText(ori_img, "score: " + str(score), tuple(points[i][0].tolist()), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+                     (0, 0, 255), 2) for i, score in enumerate(predictions.scores.cpu().detach().numpy().tolist())]
+        # 类别
+        [cv2.putText(ori_img, "cls: " + str(class_name[cls]), tuple(points[i][1].tolist()), cv2.FONT_HERSHEY_SIMPLEX,
+                     0.75,
+                     (0, 255, 0), 2) for i, cls in enumerate(predictions.pred_classes.cpu().detach().numpy().tolist())]
+
+        cv2.imwrite("{}/{}".format(res_dir, filename), ori_img)
         for ind, roi in enumerate(rois_):
-            cv2.imwrite( "{}/{}".format( res_dir, f"Inst_{ind}_" + filename ), roi )
+            cv2.imwrite("{}/{}".format(res_dir, f"Inst_{ind}_" + filename), roi)
         print("Done!")
     #     if args.output:
     #         if os.path.isdir(args.output):

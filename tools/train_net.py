@@ -34,6 +34,7 @@ from detectron2.evaluation import (
     DatasetEvaluators,
     LVISEvaluator,
     PascalVOCDetectionEvaluator,
+    BillCardDetectionEvaluator,
     SemSegEvaluator,
     verify_results,
 )
@@ -75,6 +76,8 @@ def build_evaluator(cfg, dataset_name, output_folder=None):
         return CityscapesSemSegEvaluator(dataset_name)
     elif evaluator_type == "pascal_voc":
         return PascalVOCDetectionEvaluator(dataset_name)
+    elif evaluator_type == "bill_card":
+        return BillCardDetectionEvaluator(dataset_name)
     elif evaluator_type == "lvis":
         return LVISEvaluator(dataset_name, output_dir=output_folder)
     if len(evaluator_list) == 0:

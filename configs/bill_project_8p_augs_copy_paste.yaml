@@ -14,7 +14,7 @@ MODEL:
     IOU_THRESHOLDS: [0.4, 0.5]
     IOU_LABELS: [0, -1, 1]
     SMOOTH_L1_LOSS_BETA: 0.0
-    NUM_CLASSES: 1
+    NUM_CLASSES: 3
 DATASETS:
   TRAIN: ("bill_card_train",)
   TEST: ("bill_card_val",)
